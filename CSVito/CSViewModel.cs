@@ -27,7 +27,9 @@ namespace CSVito
         }
         internal void AgregarEstudiante()
         {
-            this.personasCollection.Add(new Estudiantes { Id = this.Id++ });
+            Estudiantes nuevoEstudiante = new Estudiantes();
+            nuevoEstudiante.Validar();
+            this.personasCollection.Add(nuevoEstudiante);
         }
 
         internal void EliminarEstudiante(Estudiantes seleccionado)
@@ -62,6 +64,7 @@ namespace CSVito
                 foreach (Estudiantes estudiante in records)
                 {
                     personasCollection.Add(estudiante);
+                    estudiante.Validar();
                 }
 
             }
@@ -98,6 +101,7 @@ namespace CSVito
             {
                 AutoMap(CultureInfo.InvariantCulture);
                 Map(e => e.Valido).Ignore();
+                Map(e => e.Id).Ignore();
             }
         }
 

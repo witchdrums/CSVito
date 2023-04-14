@@ -21,22 +21,7 @@ namespace CSVito
             set
             { 
                 this.matricula = value;
-                LimpiarErrores(nameof(Matricula));
-                if (String.IsNullOrWhiteSpace(matricula))
-                {
-                    AgregarError(nameof(Matricula), "● Todos los campos son obligatorios");
-                    
-                }
-                if (matricula.Count() != 9)
-                {
-                    AgregarError(nameof(Matricula), $"● La matrícula debe contener 9 números.");
-                }
-                long matriculaNumerica = 0;
-                if (!long.TryParse(matricula, out matriculaNumerica))
-                {
-                    AgregarError(nameof(Matricula), $"● La matrícula sólo puede contener números. " +
-                    $"\n   El sufijo 'S' se agregará automáticamente al registrar el estudiante en la base de datos.");
-                }
+                ValidarMatricula();
                 OnPropertyChanged();
             }
             get { return this.matricula; }
@@ -88,17 +73,7 @@ namespace CSVito
 
         public void Validar()
         {
-            Errores = new ObservableCollection<ValidationFailure>();
-            ValidadorEstudiante validador = new ValidadorEstudiante();
-            ValidationResult resultado = validador.Validate(this);
-            this.Valido = resultado.IsValid;
-            if (!this.Valido)
-            {
-                foreach (ValidationFailure error in resultado.Errors)
-                {
-                    this.Errores.Add(error);
-                }
-            }
+            ValidarMatricula();
         }
 
         private readonly Dictionary<string, List<string>> erroresMatricula = new Dictionary<string, List<string>>();
@@ -132,6 +107,27 @@ namespace CSVito
             if (erroresMatricula.Remove(nombrePropiedad))
             {
                 ErroresCambiaron(nombrePropiedad);
+            }
+        }
+
+        private void ValidarMatricula()
+        {
+            LimpiarErrores(nameof(Matricula));
+            if (matricula == null || String.IsNullOrWhiteSpace(matricula))
+            {
+                AgregarError(nameof(Matricula), "● Todos los campos son obligatorios");
+                return;
+            }
+            if (matricula.Count() != 9 )
+            {
+                AgregarError(nameof(Matricula), $"● La matrícula debe contener 9 números.");
+            }
+            long matriculaNumerica = 0;
+            if (!long.TryParse(matricula, out matriculaNumerica))
+            {
+                AgregarError(nameof(Matricula), $"● La matrícula sólo puede contener números. " +
+                $"\n   El sufijo 'S' se agregará automáticamente al " +
+                $"\n   registrar el estudiante en la base de datos.");
             }
         }
     }

@@ -20,7 +20,10 @@
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="ToolTip">
-                            <ItemsControl ItemsSource="{Binding Path=(Validation.Errors)}" Background="#FFDC000C" Margin="0 0 3 0">
+                            <ItemsControl ItemsSource="{Binding Path=(Validation.Errors)}" 
+                                          Background="#FFDC000C" 
+                                          Margin="0 0 3 0"
+                                          Padding="15,10">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding ErrorContent}" Foreground="#FFFFFF"/>
@@ -32,18 +35,22 @@
                 </Setter>
             </Style>
 
-            <ToolTip x:Key="validationTooltip" Style="{StaticResource validationTooltipStyle}"/>
+            <ToolTip 
+                x:Key="validationTooltip" 
+                Style="{StaticResource validationTooltipStyle}"/>
 
             <Style x:Key="textBoxInError" TargetType="{x:Type TextBox}">
                 <Style.Triggers>
                     <Trigger Property="Validation.HasError" Value="true">
-                        <Setter Property="ToolTip" Value="{StaticResource validationTooltip}"/>
-
+                        <Setter 
+                            Property="ToolTip" 
+                            Value="{StaticResource validationTooltip}"/>
                     </Trigger>
                 </Style.Triggers>
-
-
             </Style>
+            
+            
+            
         </ResourceDictionary>
     </Window.Resources>
     
