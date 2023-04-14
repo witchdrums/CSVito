@@ -1,0 +1,138 @@
+﻿using FluentValidation.Results;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices.ComTypes;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace CSVito
+{
+    internal class Estudiantes : INotifyPropertyChanged, INotifyDataErrorInfo
+    {
+        public int Id {set; get;}
+        private string matricula;
+        public String Matricula 
+        {
+            set
+            { 
+                this.matricula = value;
+                LimpiarErrores(nameof(Matricula));
+                if (String.IsNullOrWhiteSpace(matricula))
+                {
+                    AgregarError(nameof(Matricula), "● Todos los campos son obligatorios");
+                    
+                }
+                if (matricula.Count() != 9)
+                {
+                    AgregarError(nameof(Matricula), $"● La matrícula debe contener 9 números.");
+                }
+                long matriculaNumerica = 0;
+                if (!long.TryParse(matricula, out matriculaNumerica))
+                {
+                    AgregarError(nameof(Matricula), $"● La matrícula sólo puede contener números. " +
+                    $"\n   El sufijo 'S' se agregará automáticamente al registrar el estudiante en la base de datos.");
+                }
+                OnPropertyChanged();
+            }
+            get { return this.matricula; }
+        }
+
+        private string nombre;
+        public String Nombre 
+        {
+            set
+            {
+                this.nombre = value;
+                LimpiarErrores(nameof(Matricula));
+                if (String.IsNullOrWhiteSpace(nombre))
+                {
+                    AgregarError(nameof(Nombre), "Todos los campos son obligatorios...");
+                    Console.WriteLine("nombre vacia");
+                }
+            }
+            get { return this.nombre; }
+        }
+        public String ApellidoPaterno { set; get; }
+        public String ApellidoMaterno { set; get; }
+        public String CorreoInstitucional { set; get; }
+        public String CorreoPersonal { set; get; }
+
+        private bool valido;
+        public bool Valido 
+        {
+            set
+            { 
+                this.valido = value;
+                OnPropertyChanged();
+            }
+            get { return this.valido; } 
+        }
+
+        public ObservableCollection<ValidationFailure> Errores { set; get; }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged([CallerMemberName] string name = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        }
+        public String ToString()
+        {
+            return $"{Matricula} | {Nombre} {ApellidoPaterno} {ApellidoMaterno}";
+
+        }
+
+        public void Validar()
+        {
+            Errores = new ObservableCollection<ValidationFailure>();
+            ValidadorEstudiante validador = new ValidadorEstudiante();
+            ValidationResult resultado = validador.Validate(this);
+            this.Valido = resultado.IsValid;
+            if (!this.Valido)
+            {
+                foreach (ValidationFailure error in resultado.Errors)
+                {
+                    this.Errores.Add(error);
+                }
+            }
+        }
+
+        private readonly Dictionary<string, List<string>> erroresMatricula = new Dictionary<string, List<string>>();
+        public bool HasErrors => erroresMatricula.Any();
+        public event EventHandler<DataErrorsChangedEventArgs> ErrorsChanged;
+        public IEnumerable GetErrors(string propertyName)
+        {
+            List<string> errores = new List<string>();
+            if (propertyName == null) return errores;
+            if (this.erroresMatricula.TryGetValue(propertyName, out List<string> erroresEncontrados))
+            {
+                errores = erroresEncontrados;
+            }
+            return errores;
+        }
+        public void AgregarError(string nombrePropiedad, string mensajeError)
+        {
+            if (!erroresMatricula.ContainsKey(nombrePropiedad))
+            {
+                erroresMatricula.Add(nombrePropiedad, new List<string>());
+            }
+            erroresMatricula[nombrePropiedad].Add(mensajeError);
+            ErroresCambiaron(nombrePropiedad);
+        }
+        private void ErroresCambiaron(string nombrePropiedad)
+        {
+            ErrorsChanged?.Invoke(this, new DataErrorsChangedEventArgs(nombrePropiedad));
+        }
+        private void LimpiarErrores(string nombrePropiedad)
+        {
+            if (erroresMatricula.Remove(nombrePropiedad))
+            {
+                ErroresCambiaron(nombrePropiedad);
+            }
+        }
+    }
+}
